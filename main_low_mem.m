@@ -11,6 +11,7 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
     
     if train
         
+        a = 4;
         training = data( 'Data\MNIST\train\' );
         training = randomise_input( training );
         update_weights = [false false true]; % this should really be input
