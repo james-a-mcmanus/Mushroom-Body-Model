@@ -11,24 +11,24 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
     
     if train
         
-        training = data('Data\MNIST\train\');
-        training = randomise_input(training);
+        training = data( 'Data\MNIST\train\' );
+        training = randomise_input( training );
         update_weights = [false false true]; % this should really be input
-        weights =cell(1,layers-1);
+        weights =cell( 1, layers - 1 );
         connections = weights;
         for l = 1:layers-1
-            weights(l) = initialise_weights(2,num_neurons(l:l+1),2,cons(l),2);
-            connections{l} = weights{l}>0;    
+            weights(l) = initialise_weights( 2, num_neurons( l : l + 1 ), 2, cons(l), 2 );
+            connections{l} = weights{l} > 0;    
         end        
         
     else % test
         
-        training = data('Data\MNIST\test\');
-        training = randomise_input(training);
+        training = data( 'Data\MNIST\test\' );
+        training = randomise_input( training );
         update_weights = [false false false];
         weights = varargin{1};
         show_aps = varargin{2};
-        numactivity = zeros(10,2);
+        numactivity = zeros(10, 2);
         
     end
     
@@ -42,14 +42,14 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
     if save_gif
         fname = 'out/network.gif';
         snapevery = 10;
-        im = cell(floor(numsteps/snapevery),1);
+        im = cell( floor( numsteps / snapevery ), 1 );
     end
     
     
-    activations = cell(1,layers);
-    activations(:) = initialise_activations(layers, num_neurons);
+    activations = cell( 1, layers );
+    activations(:) = initialise_activations( layers, num_neurons );
 
-    spiked = cell(1,layers);
+    spiked = cell( 1, layers );
     
     % universal variables
   
@@ -66,7 +66,7 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
     datime = 40;
     rest = 10;
     norm_factor = 0.00000005; % update so that only small % spike at any one time?
-    input_activity = 40*num_neurons(1);
+    input_activity = 40 * num_neurons(1);
     rewardednums = 3;
     
     % variables for each layer
@@ -84,15 +84,14 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
    
     
     % variables  for each neuron/synapes
-    recovery = fill_neurons(layers,num_neurons,0);
-    timesincespike= fill_neurons(layers,num_neurons,0);
-    nt = fill_neurons(layers,num_neurons,0);
-    output = fill_synapses(layers,num_neurons,0);
-    tag = fill_synapses(layers,num_neurons,0);
-    reversal_pot = fill_neurons(layers,num_neurons,0);
+    recovery = fill_neurons(layers, num_neurons, 0);
+    timesincespike= fill_neurons(layers, num_neurons, 0);
+    nt = fill_neurons(layers, num_neurons, 0);
+    output = fill_synapses(layers, num_neurons, 0);
+    tag = fill_synapses(layers, num_neurons, 0);
+    reversal_pot = fill_neurons(layers, num_neurons, 0);
 
-    wb = waitbar(0,'RunningModel');
-    tic
+    wb = waitbar(0, 'Running Model');
     % main loop
     for t = 1:numsteps
         
@@ -154,7 +153,7 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
             im{t/snapevery} = frame2im(frame);  %#ok<*NASGU,*AGROW>
         end
     end
-    toc
+    
     if save_gif
         save_gif(im,fname)
     end
