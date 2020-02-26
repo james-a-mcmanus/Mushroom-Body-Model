@@ -1,6 +1,8 @@
 function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train, varargin)
     
     %close all;
+    % random change to test git.
+
     
     % program control
     show_activations = false;
