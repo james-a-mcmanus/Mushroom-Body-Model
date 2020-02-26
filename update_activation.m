@@ -4,7 +4,8 @@ function [voltage, recovery, timesincespike, spiked, output] = update_activation
     voltage = update_voltage(input, voltage, resting_potential, threshold, recovery, noise, k, cap);
     %normalisation would go in here.
     if normalise
-        voltage = normalise_activity2(voltage,resting_potential);
+%         voltage = normalise_activity2(voltage,resting_potential);
+%             voltage = normalise_input(norm_factor,voltage);
     end
     recovery = calc_recovery(recovery, voltage, resting_potential, a, b);
     [voltage, recovery, timesincespike, spiked] = check_spikes(voltage, threshold, recovery, c, d, timesincespike);

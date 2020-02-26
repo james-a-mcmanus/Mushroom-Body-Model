@@ -1,6 +1,6 @@
-function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numsteps, train, varargin)
+function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train, varargin)
     
-    close all;
+    %close all;
     
     % program control
     show_activations = false;
@@ -11,8 +11,7 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
     
     if train
         
-        a = 4;
-        training = data( 'Data\MNIST\train\' );
+        training = data( 'C:\Users\MIKKO\OneDrive\Sheffield\Matlab\MB Models\Wessnitzer 2011\Data\MNIST\train\' );
         training = randomise_input( training );
         update_weights = [false false true]; % this should really be input
         weights =cell( 1, layers - 1 );
@@ -24,7 +23,7 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
         
     else % test
         
-        training = data( 'Data\MNIST\test\' );
+        training = data( 'C:\Users\MIKKO\OneDrive\Sheffield\Matlab\MB Models\Wessnitzer 2011\Data\MNIST\test\' );
         training = randomise_input( training );
         update_weights = [false false false];
         weights = varargin{1};
@@ -33,13 +32,17 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
         
     end
     
+    numdata = one_each_number( training );
+    numsteps = length(numdata.labels) * ( disptime  + resttime ) - 1;
+    
     if ~exist('numsteps','var') || isempty(numsteps)
-        numsteps = length( training.labels ) * ( disptime + resttime );
+        numsteps = length( training.labels ) * ( disptime + resttime ) ;
     end
     
     if show_activations || show_aps
         f = figure; %#ok<*UNRCH>
     end
+    
     if save_gif
         fname = 'out/network.gif';
         snapevery = 10;
@@ -66,7 +69,7 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
     imdisplay = 40;
     datime = 40;
     rest = 10;
-    norm_factor = 0.00000005; % update so that only small % spike at any one time?
+    norm_factor = 40*num_neurons(2);%0.00000005; % update so that only small % spike at any one time?
     input_activity = 40 * num_neurons(1);
     rewardednums = 3;
     
@@ -96,11 +99,15 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
     % main loop
     for t = 1:numsteps
         
+        try
         waitbar(t/numsteps,wb)
+        catch
+            return
+        end
         
         da = update_da(da, td, ba);       
         % also best to output the ba in here.
-        [input, number, ba] = get_input( t, training, num_neurons(1), disptime, resttime, input_activity, rewardednums);
+        [input, number, ba] = get_input( t, numdata, num_neurons(1), disptime, resttime, input_activity, rewardednums);
         input1 = input;
         
         
@@ -111,9 +118,9 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
                 [activations{l}, recovery{l}, timesincespike{l}, spiked{l}, output{l}] = update_activation(num_neurons(l), input, activations{l}, resting_potential(l), threshold(l), recovery{l}, timesincespike{l}, cap(l), a(l), b(l), c, d, k(l),noisestd, nt{l}, reversal_pot{l}, synt(l), quantile(l), normalise(l), norm_factor);
             end
             
-%             if normalise(l)
-%                     activations{l} = normalise_activity(activations{l}, output{l}, norm_factor, resting_potential(l));
-%             end
+%              if normalise(l)
+% %                      activations{l} = normalise_activity(activations{l}, output{l}, norm_factor, resting_potential(l));
+%              end
             
             if update_weights(l)
                 weights{l-1} = change_weights(weights{l-1},connections{l-1},timesincespike{l-1},timesincespike{l},tag{l-1},amp,da,tc,tplus);
@@ -145,7 +152,7 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, numste
         end            
         
         if ~train
-            numactivity(number+1,1) = numactivity(number+1) + sum(spiked{end});
+            numactivity(number+1,1) = numactivity(number+1) + sum(spiked{end-1});
             numactivity(number+1,2) = numactivity(number+1) + 1;
         end
         
