@@ -10,11 +10,14 @@ classdef data
         
         function obj = data(folder)
             
-            obj.folder = folder;
-            im_file = dir([folder '*image*']);
-            lbl_file = dir([folder '*labels*']);
-            obj.images = read_images(im_file.name);
-            obj.labels = read_labels(lbl_file.name);
+            if nargin > 0
+                obj.folder = folder;
+                im_file = dir([folder '*image*']);
+                lbl_file = dir([folder '*labels*']);
+                obj.images = read_images([folder im_file.name]);
+                obj.labels = read_labels([folder lbl_file.name]);
+            end
+            
             
         end 
         
