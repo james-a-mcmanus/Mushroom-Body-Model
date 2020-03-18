@@ -33,6 +33,20 @@ classdef neurob < handle
         
         end
         
+        function fillall(obj,filler)
+        
+            for l = 1:obj.numlayers
+                obj.array{l}(:,:) = filler;
+            end
+            
+        end
+        
+        function filllayer(obj,filler,layer)
+        
+            obj.array{layer}(:,:) = filler;
+            
+        end
+        
     end
 
 end

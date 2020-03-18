@@ -1,31 +1,28 @@
-classdef weightob < handle
+classdef weightob < synob
     
     properties
     
-        numneurons
-        numlayers
         weight = 2
-        array = []
         numcons
         connections = [];
         setting = 2
+        
+        update = [false true false];
         
     end
     
     methods
         
-        function obj = weights(numneurons)
+        function obj = weightob(numneurons)
+                
+            obj@synob(numneurons);
             
-                obj.numneurons = numneurons;
-                obj.numlayers = length(numneurons);
-
         end
         
         function initialise(obj)
 
             nn = obj.numneurons;
             w = cell(1,obj.numlayers-1); c = cell(1,obj.numlayers-1);
-            
             
             for l = 1: obj.numlayers - 1
 
