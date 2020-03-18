@@ -59,7 +59,47 @@ classdef weightob < synob
         
         end
         
+        function update_weights(obj,l,tspike,tag,amp,da,tc,tplus)
+             
+            if ~obj.update(l)
+                return
+            end
         
+            pret = tspike{l-1};
+            postt = tspike{l};
+            
+            
+            obj.update_tag( tag, tc, pret, postt, obj.connections{l-1}, amp, tplus );
+            
+            obj.array{l} = obj.array{l} + tag * da;
+            obj.array{l} ( obj.array{l} < 0 ) = 0;
+            
+        end
+    end
+    
+    methods (Static)
+    
+        function update_tag(l, tag, tc, pre_time, post_time, connections, amp, tplus)
+        
+            tg = tag.array{l};
+            tg = tg + -tg ./ tc + stdp( pre_time, post_time, amp, tplus ) .* (( pre_time .* post_time' ) == 0);
+            tag.array{l} = tag.array{l} + tg .* connections.array{l};
+        
+        end
+        
+        function out = stdp(pre_time, post_time, amp, tplus)
+
+            %tpre-tpost = post_time - pre_time;
+            spike_latency = post_time' - pre_time;
+
+            % note, the tag is the same whether latency is +ve or -ve, this is
+            % special case of learning which is anti-hebbian, i.e. the tag is
+            % always negative.     
+            out = (spike_latency~=0) .* amp .* exp(spike_latency/tplus);
+
+        end        
+        
+    
     end
     
 end

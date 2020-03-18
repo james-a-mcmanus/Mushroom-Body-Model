@@ -3,7 +3,7 @@ classdef activatob < neurob
     properties
         
         dvoltage;
-        updatelayers = [true true true]
+        update = [true true true]
         
     end
     
@@ -26,7 +26,7 @@ classdef activatob < neurob
         
         function update_layer(obj, l, input, resting_potential, threshold, recovery, tspike, output, cap, a, b, c, d, k,noisestd, nt, reversal, synt, quantile)
         
-            if ~obj.update_layers(l)
+            if ~obj.update(l)
                 return
             end
         

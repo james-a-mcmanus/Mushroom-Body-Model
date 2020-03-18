@@ -92,7 +92,7 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
             
             activations.update_activation(l, input, resting, threshold, recovery, timesincespike, output, cap(l), a(l), b(l), c, d, k(l),noisestd, nt{l}, reversal_pot{l}, synt(l), quantile(l), normalise(l), norm_factor);
                        
-            weights.update_weights()
+            weights.update_weights(l, timesincespike, tag, amp, da, tc, tplus)
             
             
             if update_weights(l)
