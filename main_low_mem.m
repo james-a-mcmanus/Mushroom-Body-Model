@@ -1,27 +1,30 @@
 function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train, varargin)
     
-    %close all;
-    % random change to test git.
-
-    
     % program control
     show_activations = false;
-    show_aps = true;
+    show_aps = false;
     save_gif = false;
     disptime = 40;
     resttime = 10;    
+    showbar = false;
     
     if train
         
         training = data( 'C:\Users\MIKKO\OneDrive\Sheffield\Matlab\MB Models\Wessnitzer 2011\Data\MNIST\train\' );
         training = randomise_input( training );
         update_weights = [false false true]; % this should really be input
+        
         weights =cell( 1, layers - 1 );
         connections = weights;
         for l = 1:layers-1
-            weights(l) = initialise_weights( 2, num_neurons( l : l + 1 ), 2, cons(l), 2 );
+            if isempty(varargin)
+                weights(l) = initialise_weights( 2, num_neurons( l : l + 1 ), 2, cons(l), 2 );
+            else
+                weights(l) = varargin{1}(l);
+            end
             connections{l} = weights{l} > 0;    
-        end        
+        end      
+        
         
     else % test
         
@@ -97,18 +100,17 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
     tag = fill_synapses(layers, num_neurons, 0);
     reversal_pot = fill_neurons(layers, num_neurons, 0);
 
+    if showbar
     wb = waitbar(0, 'Running Model');
+    end
     % main loop
     for t = 1:numsteps
         
-        try
+        if showbar
         waitbar(t/numsteps,wb)
-        catch
-            return
         end
         
         da = update_da(da, td, ba);       
-        % also best to output the ba in here.
         [input, number, ba] = get_input( t, numdata, num_neurons(1), disptime, resttime, input_activity, rewardednums);
         input1 = input;
         
@@ -120,10 +122,6 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
                 [activations{l}, recovery{l}, timesincespike{l}, spiked{l}, output{l}] = update_activation(num_neurons(l), input, activations{l}, resting_potential(l), threshold(l), recovery{l}, timesincespike{l}, cap(l), a(l), b(l), c, d, k(l),noisestd, nt{l}, reversal_pot{l}, synt(l), quantile(l), normalise(l), norm_factor);
             end
             
-%              if normalise(l)
-% %                      activations{l} = normalise_activity(activations{l}, output{l}, norm_factor, resting_potential(l));
-%              end
-            
             if update_weights(l)
                 weights{l-1} = change_weights(weights{l-1},connections{l-1},timesincespike{l-1},timesincespike{l},tag{l-1},amp,da,tc,tplus);
             end
@@ -132,17 +130,17 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
                 input = sum(output{l} .* weights{l})';
             end
 
-        % plot the activations.    
-        if show_activations || show_aps
-            subplot(1,layers+1,l+1)
-            if show_activations
-                imagesc(activations{l},[-85 -25]);
-            elseif show_aps
-                imagesc(timesincespike{l}==0);
+            % plot the activations.    
+            if show_activations || show_aps
+                subplot(1,layers+1,l+1)
+                if show_activations
+                    imagesc(activations{l},[-85 -25]);
+                elseif show_aps
+                    imagesc(timesincespike{l}==0);
+                end
+                drawnow
+                title(num2str(number))
             end
-            drawnow
-            title(num2str(number))
-        end
         
         end
         
@@ -154,8 +152,8 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
         end            
         
         if ~train
-            numactivity(number+1,1) = numactivity(number+1) + sum(spiked{end-1});
-            numactivity(number+1,2) = numactivity(number+1) + 1;
+            numactivity(number+1,1) = numactivity(number+1,1) + sum(spiked{end-1});
+            numactivity(number+1,2) = numactivity(number+1,2) + 1;
         end
         
         if save_gif && mod(t,snapevery)==0 %#ok<*NODEF>
@@ -168,6 +166,7 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
         save_gif(im,fname)
     end
     
-    close(wb);
-    
+    if showbar
+        close(wb);
+    end
 end
