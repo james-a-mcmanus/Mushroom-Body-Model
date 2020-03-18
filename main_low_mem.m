@@ -1,12 +1,8 @@
 function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train, varargin)
     
     % program control
-    show_activations = false;
-    show_aps = false;
-    save_gif = false;
     disptime = 40;
     resttime = 10;    
-    showbar = false;
     
     if train
         
@@ -14,16 +10,9 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
         training = randomise_input( training );
         update_weights = [false false true]; % this should really be input
         
-        weights =cell( 1, layers - 1 );
-        connections = weights;
-        for l = 1:layers-1
-            if isempty(varargin)
-                weights(l) = initialise_weights( 2, num_neurons( l : l + 1 ), 2, cons(l), 2 );
-            else
-                weights(l) = varargin{1}(l);
-            end
-            connections{l} = weights{l} > 0;    
-        end      
+        weights = weightob(num_neurons);
+        weights.cons = cons;
+        weights.initialise;
         
         
     else % test
@@ -99,20 +88,13 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
     output = fill_synapses(layers, num_neurons, 0);
     tag = fill_synapses(layers, num_neurons, 0);
     reversal_pot = fill_neurons(layers, num_neurons, 0);
-
-    if showbar
-    wb = waitbar(0, 'Running Model');
-    end
+    
     % main loop
     for t = 1:numsteps
-        
-        if showbar
-        waitbar(t/numsteps,wb)
-        end
+
         
         da = update_da(da, td, ba);       
         [input, number, ba] = get_input( t, numdata, num_neurons(1), disptime, resttime, input_activity, rewardednums);
-        input1 = input;
         
         
         % update each layer
@@ -129,44 +111,13 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
             if l < layers
                 input = sum(output{l} .* weights{l})';
             end
-
-            % plot the activations.    
-            if show_activations || show_aps
-                subplot(1,layers+1,l+1)
-                if show_activations
-                    imagesc(activations{l},[-85 -25]);
-                elseif show_aps
-                    imagesc(timesincespike{l}==0);
-                end
-                drawnow
-                title(num2str(number))
-            end
         
         end
-        
-        if show_activations || show_aps
-            subplot(1,layers+1,1)
-            image(input1)
-            drawnow
-            title(num2str(number))
-        end            
         
         if ~train
             numactivity(number+1,1) = numactivity(number+1,1) + sum(spiked{end-1});
             numactivity(number+1,2) = numactivity(number+1,2) + 1;
         end
         
-        if save_gif && mod(t,snapevery)==0 %#ok<*NODEF>
-            frame = getframe(f);
-            im{t/snapevery} = frame2im(frame);  %#ok<*NASGU,*AGROW>
-        end
-    end
     
-    if save_gif
-        save_gif(im,fname)
     end
-    
-    if showbar
-        close(wb);
-    end
-end
