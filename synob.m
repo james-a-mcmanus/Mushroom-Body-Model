@@ -31,5 +31,15 @@ classdef synob < handle
             obj.array = a;
         end
         
+        function fillall(obj, filler)
+            
+            for l = 1:obj.numlayers
+            
+                obj.array{l}(:,:) = filler;
+            
+            end
+            
+        end
+        
     end
 end

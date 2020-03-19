@@ -2,7 +2,7 @@ classdef weightob < synob
     
     properties
     
-        weight = 2
+        dweight = [0.25 2];
         numcons
         connections = [];
         setting = 2
@@ -40,7 +40,7 @@ classdef weightob < synob
                         permby = nan(nn(l),nn(l+1));
                         w{l} =  zeros(nn(l), nn(l+1)); % basically 10 connections spread across 
 
-                        w{l}(1:cons,:) = obj.weight;
+                        w{l}(1:cons,:) = obj.dweight(l);
 
                         for n = 1:nn(l+1)
                             permby(:,n) = randperm(nn(l));
@@ -65,27 +65,28 @@ classdef weightob < synob
                 return
             end
         
-            pret = tspike{l-1};
-            postt = tspike{l};
+            pret = tspike.array{l-1};
+            postt = tspike.array{l};
             
             
-            obj.update_tag( tag, tc, pret, postt, obj.connections{l-1}, amp, tplus );
+            obj.update_tag(l, tag, tc, pret, postt, obj.connections{l-1}, amp, tplus );
             
             obj.array{l} = obj.array{l} + tag * da;
             obj.array{l} ( obj.array{l} < 0 ) = 0;
             
         end
+        
+        function update_tag(obj, l, tag, tc, pre_time, post_time, connections, amp, tplus)
+        
+            tg = tag.array{l};
+            tg = tg + -tg ./ tc + obj.stdp( pre_time, post_time, amp, tplus ) .* (( pre_time .* post_time' ) == 0);
+            tag.array{l} = tag.array{l} + tg .* connections.array{l};
+        
+        end        
+        
     end
     
     methods (Static)
-    
-        function update_tag(l, tag, tc, pre_time, post_time, connections, amp, tplus)
-        
-            tg = tag.array{l};
-            tg = tg + -tg ./ tc + stdp( pre_time, post_time, amp, tplus ) .* (( pre_time .* post_time' ) == 0);
-            tag.array{l} = tag.array{l} + tg .* connections.array{l};
-        
-        end
         
         function out = stdp(pre_time, post_time, amp, tplus)
 
