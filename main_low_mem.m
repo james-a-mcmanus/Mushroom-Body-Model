@@ -15,9 +15,6 @@ function [weights] = main_low_mem(layers, num_neurons, cons, train, varargin)
     end
     
     training = randomise_input(training);
-        
-    weights = weightob(num_neurons);
-    weights.numcons = cons;
     
     % need to objectify the training data a bit more.
     numdata = one_each_number( training );
@@ -28,11 +25,20 @@ function [weights] = main_low_mem(layers, num_neurons, cons, train, varargin)
         numsteps = length( training.labels ) * ( disptime + resttime ) ;
     end
     
+    % objects for each neuron/synapse
+    weights = weightob(num_neurons);
+    weights.numcons = cons; 
     activations = activatob(num_neurons);
-    spiked = spikob(num_neurons);
+    recovery = neurob(num_neurons); recovery.fillall(0);
+    timesincespike = spikob(num_neurons); timesincespike.fillall(0);
+    nt = neurob(num_neurons); nt.fillall(0);
+    output = synob(num_neurons); output.fillall(0);
+    tag = synob(num_neurons); tag.fillall(0);
+    reversal_pot = neurob(num_neurons); reversal_pot.fillall(0);
+    
+    
     
     % universal variables
-  
     c = -65;
     d = 8;
     noisestd = 0.05;    
@@ -45,7 +51,6 @@ function [weights] = main_low_mem(layers, num_neurons, cons, train, varargin)
     imdisplay = 40;
     datime = 40;
     rest = 10;
-    norm_factor = 40*num_neurons(2);%0.00000005; % update so that only small % spike at any one time?
     input_activity = 40 * num_neurons(1);
     rewardednums = 3;
     
@@ -60,13 +65,6 @@ function [weights] = main_low_mem(layers, num_neurons, cons, train, varargin)
     quantile = [0.93 8 nan];
    
     
-    % variables  for each neuron/synapes
-    recovery = neurob(num_neurons); recovery.fillall(0);
-    timesincespike = spikob(num_neurons); timesincespike.fillall(0);
-    nt = neurob(num_neurons); nt.fillall(0);
-    output = synob(num_neurons); output.fillall(0);
-    tag = synob(num_neurons); tag.fillall(0);
-    reversal_pot = neurob(num_neurons); reversal_pot.fillall(0);
     
     %initialise all
     activations.initialise();
@@ -85,6 +83,9 @@ function [weights] = main_low_mem(layers, num_neurons, cons, train, varargin)
             
             activations.update_activation(l, input, threshold, recovery, timesincespike, output, cap(l), a(l), b(l), c, d, k(l),noisestd, nt, reversal_pot, synt(l), quantile(l));
                        
+            
+            
+            
             weights.update_weights(l, timesincespike, tag, amp, da, tc, tplus)
             
             if l < layers
