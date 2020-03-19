@@ -47,15 +47,16 @@ classdef weightob < synob
                         end
 
                         w{l} = w{l}(permby);
-                        c{l} = w{1} ~= 0;
+                        c{l} = w{l} ~= 0;
 
                 end
 
-                obj.array = w;
-                obj.connections = c;
 
-            end            
+
+            end
             
+            obj.array = w;
+            obj.connections = c;            
         
         end
         
@@ -65,13 +66,13 @@ classdef weightob < synob
                 return
             end
         
-            pret = tspike.array{l-1};
-            postt = tspike.array{l};
+            pret = tspike.array{l};
+            postt = tspike.array{l+1};
             
             
-            obj.update_tag(l, tag, tc, pret, postt, obj.connections{l-1}, amp, tplus );
+            obj.update_tag(l, tag, tc, pret, postt, obj.connections{l}, amp, tplus );
             
-            obj.array{l} = obj.array{l} + tag * da;
+            obj.array{l} = obj.array{l} + tag.array{l} * da;
             obj.array{l} ( obj.array{l} < 0 ) = 0;
             
         end
@@ -80,7 +81,7 @@ classdef weightob < synob
         
             tg = tag.array{l};
             tg = tg + -tg ./ tc + obj.stdp( pre_time, post_time, amp, tplus ) .* (( pre_time .* post_time' ) == 0);
-            tag.array{l} = tag.array{l} + tg .* connections.array{l};
+            tag.array{l} = tag.array{l} + tg .* connections;
         
         end        
         

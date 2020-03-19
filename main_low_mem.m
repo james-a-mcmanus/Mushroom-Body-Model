@@ -1,4 +1,4 @@
-function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train, varargin)
+function [weights] = main_low_mem(layers, num_neurons, cons, train, varargin)
     
     % program control
     disptime = 40;
@@ -93,13 +93,6 @@ function [weights, numactivity] = main_low_mem(layers, num_neurons, cons, train,
         
             timesincespike.update_numcounts(l,number);
             
-            
         end
-        
-        if ~train
-            numactivity(number+1,1) = numactivity(number+1,1) + sum(spiked{end-1});
-            numactivity(number+1,2) = numactivity(number+1,2) + 1;
-        end
-        
     
     end
