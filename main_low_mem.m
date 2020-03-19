@@ -3,27 +3,17 @@ function [weights] = main_low_mem(layers, num_neurons, cons, train, varargin)
     % program control
     disptime = 40;
     resttime = 10;    
+    figure
     
     if train
-        
         training = data( 'C:\Users\MIKKO\OneDrive\Sheffield\Matlab\MB Models\Wessnitzer 2011\Data\MNIST\train\' );
-        
     else % test
-        
         training = data( 'C:\Users\MIKKO\OneDrive\Sheffield\Matlab\MB Models\Wessnitzer 2011\Data\MNIST\test\' );
-
     end
-    
     training = randomise_input(training);
-    
     % need to objectify the training data a bit more.
     numdata = one_each_number( training );
-    
     numsteps = length(numdata.labels) * ( disptime  + resttime ) - 1;
-    
-    if ~exist('numsteps','var') || isempty(numsteps)
-        numsteps = length( training.labels ) * ( disptime + resttime ) ;
-    end
     
     % objects for each neuron/synapse
     weights = weightob(num_neurons);
@@ -35,7 +25,6 @@ function [weights] = main_low_mem(layers, num_neurons, cons, train, varargin)
     output = synob(num_neurons); output.fillall(0);
     tag = synob(num_neurons); tag.fillall(0);
     reversal_pot = neurob(num_neurons); reversal_pot.fillall(0);
-    
     
     
     % universal variables
@@ -83,7 +72,10 @@ function [weights] = main_low_mem(layers, num_neurons, cons, train, varargin)
             
             activations.update_activation(l, input, threshold, recovery, timesincespike, output, cap(l), a(l), b(l), c, d, k(l),noisestd, nt, reversal_pot, synt(l), quantile(l));
                        
-            
+            subplot(1,activations.numlayers+1,l+1)
+            imagesc(timesincespike.array{l}==0);
+            drawnow
+            title(num2str(number))            
             
             
             weights.update_weights(l, timesincespike, tag, amp, da, tc, tplus)

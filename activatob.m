@@ -74,6 +74,13 @@ classdef activatob < neurob
             
         end
        
+        function normalise(obj)
+        
+            
+        
+        end
+        
+        
     end
     
     methods (Static)
